@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: registration-microservices-service
+  main:
+    banner-mode: off
 
 eureka:
   instance:

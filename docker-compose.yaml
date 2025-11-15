@@ -20,7 +20,10 @@ services:
         container_name: kibana
         environment:
             ELASTICSEARCH_SERVICEACCOUNTTOKEN: AAEAAWVsYXN0aWMva2liYW5hL3Rva2VuMTpyampmaHZuOVJnaUVvb0VvWG1mQTZB
-            ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+            ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+        volumes:
+          - ./docker-config/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+          - kibana_data:/usr/share/kibana/data
         depends_on:
             - elasticsearch
         ports:
@@ -34,6 +37,9 @@ services:
             - elasticsearch
         ports:
             - "5044:5044" # For Beats input
+            - "5000:5000/tcp"
+            - "5000:5000/udp"
+            - "9600:9600"
         environment:
           LS_JAVA_OPTS: "-Xmx256m -Xms256m"
           ELASTICSEARCH_USERNAME: elastic
@@ -43,21 +49,22 @@ services:
           XPACK_MONITORING_ELASTICSEARCH_HOSTS: 'elasticsearch:9200'
           XPACK_MONITORING_ENABLED: "true"
         volumes:
-            - ./docker-config/logstash/pipeline:/usr/share/logstash/pipeline
+          - ./docker-config/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+          - ./docker-config/logstash/pipeline:/usr/share/logstash/pipeline
         networks:
             - elastic    
     db:
         image: postgres:alpine
-        container_name: db_service
+        container_name: db
         environment:
-            - POSTGRES_USER=admin
-            - POSTGRES_PASSWORD=admin123
-            - POSTGRES_DB=default_db
+            POSTGRES_USER: admin
+            POSTGRES_PASSWORD: admin123
+            POSTGRES_DB: default_db
         ports:
-            - "5432:5432"
+            - "5430:5432"
         volumes:
             - ./db-init:/docker-entrypoint-initdb.d
-            - db_user_data:/var/lib/postgresql/data
+            - postgres_data:/var/lib/postgresql/data
         networks:
             - data_net
     kafka:
@@ -92,12 +99,72 @@ services:
         - kafka_data:/var/lib/kafka/data
         networks:
         - data_net
+    api-gateway:
+      build: ./api-gateway-service/
+      container_name: api-gateway-service
+      environment:
+        DB_HOST: db
+        EUREKA_HOST: registration-microservices-service
+      ports:
+        - "8060:8060"
+      networks:
+        - elastic
+        - data_net
+    auth-service:
+      build: ./auth-service/
+      container_name: auth-service
+      ports:
+        - "8070:8070"
+      networks:
+        - elastic
+        - data_net
+    config-service:
+      build: ./config-service/
+      container_name: config-service
+      ports:
+        - "8088:8088"
+      networks:
+        - elastic
+        - data_net
+    hotel-service:
+      build: ./hotel-service/
+      container_name: hotel-service
+      ports:
+        - "8082:8082"
+      networks:
+        - elastic
+        - data_net
+    payment-service:
+      build: ./payment-service/
+      container_name: payment-service
+      ports:
+        - "8083:8083"
+      networks:
+        - elastic
+        - data_net
+    user-service:
+      build: ./user-service/
+      container_name: user-service
+      ports:
+        - "8081:8081"
+      networks:
+        - elastic
+        - data_net
+    registration-microservices-service:
+      build: ./registration-microservices-service/
+      container_name: registration-microservices-service
+      ports:
+        - "8761:8761"
+      networks:
+        - data_net
 volumes:
     eslasticsearch_data:
         driver: local
-    db_user_data:
+    postgres_data:
         driver: local
     kafka_data:
+        driver: local
+    kibana_data:
         driver: local
 networks:
     elastic:

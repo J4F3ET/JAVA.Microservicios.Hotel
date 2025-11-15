@@ -12,13 +12,15 @@ management:
       probability: 1.0
 
 spring:
+  main:
+    banner-mode: off
   cloud:
     discovery:
       enabled: true
   datasource:
-    url: "jdbc:postgresql://db:5432/db_users"
-    username: "user_users"
-    password: "usersAdminPassword123"
+    url: "jdbc:postgresql://${DB_HOST:localhost}:5430/db_users"
+    username: "uuser"
+    password: "admin-password-uuser*"
   jpa:
     hibernate:
       ddl-auto: update

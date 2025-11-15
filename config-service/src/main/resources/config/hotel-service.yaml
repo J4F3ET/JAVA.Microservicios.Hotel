@@ -12,10 +12,15 @@ management:
       probability: 1.0
 
 spring:
+  main:
+    banner-mode: off
+  cloud:
+    discovery:
+      enabled: true
   datasource:
-    url: "jdbc:postgresql://db:5432/db_hotel"
-    username: "user_hotel"
-    password: "hotelAdminPassword123"
+    url: "jdbc:postgresql://${DB_HOST:localhost}:5430/db_hotel"
+    username: "uhotel"
+    password: "admin-password-uhotel*"
   jpa:
     hibernate:
       ddl-auto: update
