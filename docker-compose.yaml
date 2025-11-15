@@ -103,8 +103,13 @@ services:
       build: ./api-gateway-service/
       container_name: api-gateway-service
       environment:
-        DB_HOST: db
+        CONFIG_SERVICE_HOST: config-service
         EUREKA_HOST: registration-microservices-service
+        LOGSTASH_HOST: logstash
+      depends_on:
+        - config-service
+        - registration-microservices-service
+        - logstash
       ports:
         - "8060:8060"
       networks:
@@ -113,22 +118,38 @@ services:
     auth-service:
       build: ./auth-service/
       container_name: auth-service
+      environment:
+        CONFIG_SERVICE_HOST: config-service
+        DB_HOST: db
+        DB_PORT: 5432
+        EUREKA_HOST: registration-microservices-service
+        LOGSTASH_HOST: logstash
+      depends_on:
+        - db
+        - kafka
+        - config-service
+        - registration-microservices-service
+        - logstash
       ports:
         - "8070:8070"
-      networks:
-        - elastic
-        - data_net
-    config-service:
-      build: ./config-service/
-      container_name: config-service
-      ports:
-        - "8088:8088"
       networks:
         - elastic
         - data_net
     hotel-service:
       build: ./hotel-service/
       container_name: hotel-service
+      environment:
+        DB_HOST: db
+        DB_PORT: 5432
+        EUREKA_HOST: registration-microservices-service
+        CONFIG_SERVICE_HOST: config-service
+        LOGSTASH_HOST: logstash
+      depends_on:
+        - db
+        - kafka
+        - config-service
+        - registration-microservices-service
+        - logstash
       ports:
         - "8082:8082"
       networks:
@@ -137,6 +158,18 @@ services:
     payment-service:
       build: ./payment-service/
       container_name: payment-service
+      environment:
+        DB_HOST: db
+        DB_PORT: 5432
+        EUREKA_HOST: registration-microservices-service
+        CONFIG_SERVICE_HOST: config-service
+        LOGSTASH_HOST: logstash
+      depends_on:
+        - db
+        - kafka
+        - config-service
+        - registration-microservices-service
+        - logstash
       ports:
         - "8083:8083"
       networks:
@@ -145,6 +178,18 @@ services:
     user-service:
       build: ./user-service/
       container_name: user-service
+      environment:
+        DB_HOST: db
+        DB_PORT: 5432
+        EUREKA_HOST: registration-microservices-service
+        CONFIG_SERVICE_HOST: config-service
+        LOGSTASH_HOST: logstash
+      depends_on:
+        - db
+        - kafka
+        - config-service
+        - registration-microservices-service
+        - logstash
       ports:
         - "8081:8081"
       networks:
@@ -153,9 +198,26 @@ services:
     registration-microservices-service:
       build: ./registration-microservices-service/
       container_name: registration-microservices-service
+      environment:
+        SERVICE_HOST: registration-microservices-service
       ports:
         - "8761:8761"
       networks:
+        - data_net
+    config-service:
+      build: ./config-service/
+      container_name: config-service
+      environment:
+        EUREKA_HOST: registration-microservices-service
+        LOGSTASH_HOST: logstash
+      depends_on:
+        - registration-microservices-service
+      ports:
+        - "8088:8088"
+      volumes:
+        - ./config-service/src/main/resources/config:/app/src/main/resources/config # Permite que no tenga que recrear la imagen completa del servicio para hacer valida las configuraciones de otros microservicios
+      networks:
+        - elastic
         - data_net
 volumes:
     eslasticsearch_data:

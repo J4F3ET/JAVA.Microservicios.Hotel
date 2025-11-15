@@ -4,7 +4,7 @@ server:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://${EUREKA_HOST:localhost}:8761/eureka/
 
 management:
   tracing:
@@ -18,7 +18,7 @@ spring:
     discovery:
       enabled: true
   datasource:
-    url: "jdbc:postgresql://${DB_HOST:localhost}:5430/db_payments"
+    url: "jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5430}/db_payments"
     username: "upayment"
     password: "admin-password-upayment*"
   jpa:

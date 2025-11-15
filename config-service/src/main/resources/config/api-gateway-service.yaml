@@ -21,7 +21,19 @@ spring:
       server:
         webflux:
           routes:
-            - id: users-service
-              uri: lb://users-service
+            - id: user-service
+              uri: lb://user-service
               predicates:
                 - Path=/api/users/**
+            - id: hotel-service
+              uri: lb://hotel-service
+              predicates:
+                - Path=/api/hotel/**
+            - id: payment-service
+              uri: lb://payment-service
+              predicates:
+                - Path=/api/payments/**
+            - id: auth-service
+              uri: lb://auth-service
+              predicates:
+                - Path=/api/auth/**
