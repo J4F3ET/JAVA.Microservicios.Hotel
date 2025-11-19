@@ -1,9 +1,6 @@
 package microservices.hotel.user_service.domain.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,8 +15,9 @@ import lombok.Setter;
 public class DocumentTypeEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "document_type_id")
-    private Integer id;
+    private Byte id;
 
     private String type;
 
